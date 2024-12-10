@@ -1,56 +1,74 @@
 """Markdown Calendar Generator"""
+
 import calendar
 from datetime import datetime
 import sys
 
+############################################################
+START_FROM_SUN = True  # If True, start the week from Sunday
+WITH_ISOWEEK = False  # If True, display the week number
+ONLY_THIS_MONTH = True  # If True, only display days within the month
+ENGLISH = "en"
+JAPANESE = "ja"
+CHINESE = "cht"
+LANG = ENGLISH  # Language of the column names: en, ja, cht
+############################################################
 
-def create_calendar(year, month, with_isoweek=False, start_from_Sun=False, lang="en"):
-    firstweekday = 6 if start_from_Sun else 0
+
+def create_calendar(year, month):
+    firstweekday = 6 if START_FROM_SUN else 0
 
     cal = calendar.Calendar(firstweekday=firstweekday)
 
     mdstr = ""
-    dic = get_dict(lang)
+    dic = get_dict()
 
     colnames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    if start_from_Sun:
+    if START_FROM_SUN:
         colnames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-    if with_isoweek:
+    if WITH_ISOWEEK:
         colnames.insert(0, "Week")
     colnames = [dic[col] for col in colnames]
 
-    mdstr += '|' + '|'.join(colnames) + '|' + '\n'
-    mdstr += '|' + '|'.join([':-:' for _ in range(len(colnames))]) + '|' + '\n'
+    mdstr += "|" + "|".join(colnames) + "|" + "\n"
+    mdstr += "|" + "|".join([":-:" for _ in range(len(colnames))]) + "|" + "\n"
 
     for days in cal.monthdatescalendar(year, month):
-        if with_isoweek:
+        if WITH_ISOWEEK:
             isoweek = days[0].isocalendar()[1]
-            mdstr += '|' + str(isoweek) + '|' + \
-                '|'.join([str(d.day) for d in days]) + '|' + '\n'
+            mdstr += (
+                "|"
+                + str(isoweek)
+                + "|"
+                + "|".join([str(d.day) for d in days])
+                + "|"
+                + "\n"
+            )
         else:
-            mdstr += '|' + '|'.join([str(d.day) for d in days]) + '|' + '\n'
+            mdstr += "|" + "|".join([str(d.day) for d in days]) + "|" + "\n"
 
     return mdstr
 
 
-def print_calendar(year, month, with_isoweek=False, start_from_Sun=False, lang="en"):
-    print('{}/{}\n'.format(year, month))
-    print(create_calendar(year, month, with_isoweek, start_from_Sun, lang))
+def print_calendar(year, month):
+    print("{}/{}\n".format(year, month))
+    print(create_calendar(year, month))
 
 
-def get_dict(lang='en'):
-    dic = {}
-    colnames = ['Week', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    colnames_ja = ['週', '月', '火', '水', '木', '金', '土', '日']
-    if lang == 'en':
-        for col in colnames:
-            dic[col] = col
-    elif lang == 'ja':
-        for col, colja in zip(colnames, colnames_ja):
-            dic[col] = colja
+def get_dict():
+    colnames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    colnames_ja = ["月", "火", "水", "木", "金", "土", "日"]
+    colnames_cht = ["一", "二", "三", "四", "五", "六", "日"]
+    if WITH_ISOWEEK:
+        colnames.insert(0, "Week")
+        colnames_ja.insert(0, "週")
+        colnames_cht.insert(0, "週")
+    if LANG == "ja":
+        dic = dict(zip(colnames, colnames_ja))
+    elif LANG == "cht":
+        dic = dict(zip(colnames, colnames_cht))
     else:
-        for col in colnames:
-            dic[col] = col
+        dic = {col: col for col in colnames}
     return dic
 
 
@@ -62,9 +80,15 @@ if __name__ == "__main__":
     elif len(argv) == 2:
         year = int(argv[1])
         for month in range(1, 13):
-            print_calendar(year, month, with_isoweek=True)
+            print_calendar(year, month)
     elif len(argv) == 3:
-        year, month = [int(a) for a in argv[1:3]]
-        print_calendar(year, month)
+        if argv[1].isdigit() and argv[2].isdigit():
+            year, month = [int(a) for a in argv[1:3]] 
+            if month < 1 or month > 12:
+                print("Invalid month. Please enter a valid month.")
+            else:
+                print_calendar(year, month)
+        else:
+            print("Usage: python mdcal.py [year] [month]")
     else:
-        print('Usage: python mdcal.py [year] [month]')
+        print("Usage: python mdcal.py [year] [month]")
