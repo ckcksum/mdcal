@@ -34,18 +34,25 @@ def create_calendar(year, month):
     mdstr += "|" + "|".join([":-:" for _ in range(len(colnames))]) + "|" + "\n"
 
     for days in cal.monthdatescalendar(year, month):
+        daystr = []
+        for day in days:
+            if ONLY_THIS_MONTH and day.month != month:
+                daystr.append(" ")
+            else:
+                daystr.append(str(day.day))
+
         if WITH_ISOWEEK:
             isoweek = days[0].isocalendar()[1]
             mdstr += (
                 "|"
                 + str(isoweek)
                 + "|"
-                + "|".join([str(d.day) for d in days])
+                + "|".join(daystr)
                 + "|"
                 + "\n"
             )
         else:
-            mdstr += "|" + "|".join([str(d.day) for d in days]) + "|" + "\n"
+            mdstr += "|" + "|".join(daystr) + "|" + "\n"
 
     return mdstr
 
