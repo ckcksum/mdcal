@@ -3,11 +3,12 @@
 import calendar
 from datetime import datetime
 import sys
+import argvChecking as ac
 
 ############################################################
-START_FROM_SUN = True  # If True, start the week from Sunday
+START_FROM_SUN = False  # If True, start the week from Sunday
 WITH_ISOWEEK = False  # If True, display the week number
-ONLY_THIS_MONTH = True  # If True, only display days within the month
+ONLY_THIS_MONTH = False  # If True, only display days within the month
 ENGLISH = "en"
 JAPANESE = "ja"
 CHINESE = "cht"
@@ -44,13 +45,7 @@ def create_calendar(year, month):
         if WITH_ISOWEEK:
             isoweek = days[0].isocalendar()[1]
             mdstr += (
-                "|"
-                + str(isoweek)
-                + "|"
-                + "|".join(daystr)
-                + "|"
-                + "\n"
-            )
+                "|" + str(isoweek) + "|" + "|".join(daystr) + "|" + "\n" )
         else:
             mdstr += "|" + "|".join(daystr) + "|" + "\n"
 
@@ -78,24 +73,23 @@ def get_dict():
         dic = {col: col for col in colnames}
     return dic
 
-
+# year, month, start day, iso week, only this month, lang
 if __name__ == "__main__":
     argv = sys.argv
-    if len(argv) == 1:
+    if len(argv) == 1: 
         today = datetime.now()
         print_calendar(today.year, today.month)
-    elif len(argv) == 2:
-        year = int(argv[1])
-        for month in range(1, 13):
-            print_calendar(year, month)
-    elif len(argv) == 3:
-        if argv[1].isdigit() and argv[2].isdigit():
-            year, month = [int(a) for a in argv[1:3]] 
-            if month < 1 or month > 12:
-                print("Invalid month. Please enter a valid month.")
-            else:
-                print_calendar(year, month)
-        else:
-            print("Usage: python mdcal.py [year] [month]")
+    elif len(argv) == 2:  ## y
+        ac.check_argv_2(argv)
+    elif len(argv) == 3: ## y, m
+        ac.check_argv_3(argv)
+    elif len(argv) == 4: ## y, m, sun
+        ac.check_argv_4(argv)
+    elif len(argv) == 5: ## y, m, sun, iso
+        ac.check_argv_5(argv)
+    elif len(argv) == 6: ## y, m, sun, iso, only
+        ac.check_argv_6(argv)
+    elif len(argv) == 7: ## y, m, sun, iso, only, lang
+        ac.check_argv_7(argv)
     else:
         print("Usage: python mdcal.py [year] [month]")
